@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Formulario de Carga</title>
+    <link rel="stylesheet" type="text/css" href="../CSS/subir_archivos.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Subir Documento</h1>
+      <form action="procesar.php" method="post">
+        <label for="vin">Número de VIN:</label>
+        <input type="text" id="vin" name="vin" required />
+
+        <label for="seguro">Número de Seguro:</label>
+        <input type="text" id="seguro" name="seguro" required />
+
+        <label for="pdf">Subir archivo PDF:</label>
+        <label class="custom-file-upload">
+          <input type="file" id="pdf" name="pdf" accept=".pdf" required />
+          Elegir archivo
+        </label>
+
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </body>
+</html>
