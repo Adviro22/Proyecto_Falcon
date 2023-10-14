@@ -1,9 +1,13 @@
 import express from "express";
+import { auth } from "./auth.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import path from "path";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import cookieSession from "cookie-session";
 import connection, { dbConfig } from "./db.js";
+import bodyParser from "body-parser";
+import bcryptjs from "bcryptjs";
 
 dotenv.config({ path: "./.env" });
 
@@ -15,14 +19,39 @@ const __dirname = dirname(__filename);
 
 app.use(express.static("public"));
 
-// VISTAS DEL PROYECTO
-app.get("/", function (req, res) {
+app.use(express.static(path.join(__dirname, "public/HTML")));
+
+// Configura EJS como motor de plantillas
+app.set("view engine", "ejs");
+
+app.set("views", path.join(__dirname, "public/EJS"));
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["tu_clave_secreta_aqui"],
+    maxAge: 24 * 60 * 60 * 1000, // Tiempo de vida de la sesión en milisegundos (1 día en este caso)
+  })
+);
+
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/", auth, function (req, res) {
   // Utiliza el método `join` del módulo `path` para construir rutas de forma segura
   const indexPath = path.join(__dirname, "public", "/HTML/index.html");
   res.sendFile(indexPath);
 });
 
-app.get("/subir-archivos", function (req, res) {
+app.get("/perfil-usuario", (req, res) => {
+  if (!req.session.username) {
+    res.redirect("/login");
+    return;
+  }
+
+  res.render("Perfil", { username: req.session.username.username });
+});
+
+app.get("/subir-archivos", auth, function (req, res) {
   // Utiliza el método `join` del módulo `path` para construir rutas de forma segura
   const indexPath = path.join(__dirname, "public", "/HTML/subir_archivos.html");
   res.sendFile(indexPath);
@@ -44,6 +73,91 @@ app.get("/login", function (req, res) {
   // Utiliza el método `join` del módulo `path` para construir rutas de forma segura
   const indexPath = path.join(__dirname, "public", "/HTML/login.html");
   res.sendFile(indexPath);
+});
+
+//AUTENTIFICACION
+// Dentro de tu ruta de autenticación ("/auth")
+app.post("/auth", async (req, res) => {
+  const user = req.body.username;
+  const pass = req.body.password;
+  if (user && pass) {
+    connection.query(
+      "SELECT * FROM User WHERE username = ?",
+      [user],
+      async (error, results) => {
+        if (results.length === 0) {
+          res.render("login", {
+            alert: true,
+            alertTitle: "Error",
+            alertMessage: "Usuario y/o contraseña incorrectos",
+            alertIcon: "error",
+            showConfirmButton: true,
+            timer: false,
+            ruta: "login",
+          });
+        } else {
+          // Compara la contraseña proporcionada con la contraseña hash almacenada
+          const isPasswordValid = await bcryptjs.compare(
+            pass,
+            results[0].password
+          );
+
+          if (isPasswordValid) {
+            // Crear un objeto de usuario
+            const userInfo = {
+              id: results[0].id,
+              username: results[0].username,
+            };
+
+            // Almacena el objeto de usuario en la sesión de la cookie
+            req.session.username = userInfo;
+
+            // Establece una cookie para indicar que el usuario está autenticado
+            req.session.loggedin = true;
+
+            // Redirige al usuario a la página principal después del inicio de sesión
+            res.redirect("/perfil-usuario");
+          } else {
+            res.render("login", {
+              alert: true,
+              alertTitle: "Error",
+              alertMessage: "Usuario y/o contraseña incorrectos",
+              alertIcon: "error",
+              showConfirmButton: true,
+              timer: false,
+              ruta: "login",
+            });
+          }
+        }
+      }
+    );
+  } else {
+    res.send("Por favor ingrese un usuario y contraseña");
+  }
+});
+
+//Registro de Usuarios
+app.post("/register", async (req, res) => {
+  const username = req.body.username;
+  const pass = req.body.password;
+  let passwordHaash = await bcryptjs.hash(pass, 8);
+  connection.query(
+    "INSERT INTO User SET ?",
+    { username: username, password: passwordHaash },
+    async (error, results) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.send("REGISTRO EXITOSO");
+      }
+    }
+  );
+});
+
+// La ruta de cierre de sesión
+app.get("/logout", function (req, res) {
+  req.session = null; // Destruye la sesión eliminándola
+  res.redirect("/"); // Redirige al inicio u otra página después de cerrar sesión
 });
 
 // PETICIONES DEL PROYECTO
