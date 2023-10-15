@@ -86,47 +86,28 @@ app.post("/auth", async (req, res) => {
       [user],
       async (error, results) => {
         if (results.length === 0) {
-          res.render("login", {
-            alert: true,
-            alertTitle: "Error",
-            alertMessage: "Usuario y/o contraseña incorrectos",
-            alertIcon: "error",
-            showConfirmButton: true,
-            timer: false,
-            ruta: "login",
-          });
+          // Redirige al usuario a la página de inicio de sesión (archivo HTML)
+          res.sendFile(path.join(__dirname, "public/HTML/login.html"));
         } else {
-          // Compara la contraseña proporcionada con la contraseña hash almacenada
           const isPasswordValid = await bcryptjs.compare(
             pass,
             results[0].password
           );
 
           if (isPasswordValid) {
-            // Crear un objeto de usuario
             const userInfo = {
               id: results[0].id,
               username: results[0].username,
             };
 
-            // Almacena el objeto de usuario en la sesión de la cookie
             req.session.username = userInfo;
-
-            // Establece una cookie para indicar que el usuario está autenticado
             req.session.loggedin = true;
 
-            // Redirige al usuario a la página principal después del inicio de sesión
+            // Redirige al usuario a la página de perfil después del inicio de sesión
             res.redirect("/perfil-usuario");
           } else {
-            res.render("login", {
-              alert: true,
-              alertTitle: "Error",
-              alertMessage: "Usuario y/o contraseña incorrectos",
-              alertIcon: "error",
-              showConfirmButton: true,
-              timer: false,
-              ruta: "login",
-            });
+            // Autenticación fallida, redirige a la página de inicio de sesión con una query string
+            res.redirect("/login?error=true");
           }
         }
       }
