@@ -57,9 +57,9 @@ app.get("/subir-archivos", auth, function (req, res) {
   res.sendFile(indexPath);
 });
 
-app.get("/visor-pdf", function (req, res) {
+app.get("/mostrar-datos", function (req, res) {
   // Utiliza el método `join` del módulo `path` para construir rutas de forma segura
-  const indexPath = path.join(__dirname, "public", "/HTML/visor_pdf.html");
+  const indexPath = path.join(__dirname, "public", "/HTML/mostrar_datos.html");
   res.sendFile(indexPath);
 });
 

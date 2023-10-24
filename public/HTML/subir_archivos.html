@@ -6,23 +6,95 @@
     <link rel="stylesheet" type="text/css" href="../CSS/subir_archivos.css" />
   </head>
   <body>
-    <div class="container">
-      <h1>Subir Documento</h1>
-      <form action="procesar.php" method="post">
-        <label for="vin">Número de VIN:</label>
-        <input type="text" id="vin" name="vin" required />
+    <h1>Formulario de Seguro</h1>
+    <form action="procesar.php" method="post">
+        <h2>Información de la Póliza</h2>
 
-        <label for="seguro">Número de Seguro:</label>
-        <input type="text" id="seguro" name="seguro" required />
+        <label for="estadoPoliza">Estado de Póliza:</label>
+        <select id="estadoPoliza" name="estadoPoliza">
+            <option value="">Seleccionar...</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Approved">Approved</option>
+        </select>
 
-        <label for="pdf">Subir archivo PDF:</label>
-        <label class="custom-file-upload">
-          <input type="file" id="pdf" name="pdf" accept=".pdf" required />
-          Elegir archivo
-        </label>
+        <label for="numeroPoliza">Número de Póliza:</label>
+        <input type="text" id="numeroPoliza" name="numeroPoliza" required>
+
+        <label for="fechaInicio">Fecha de Inicio:</label>
+        <input type="date" id="fechaInicio" name="fechaInicio" required>
+
+        <label for="fechaFinalizacion">Fecha de Finalización:</label>
+        <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" required>
+
+        <h2>Propietario de Póliza</h2>
+        <label for="nombreCompleto">Nombre Completo:</label>
+        <input type="text" id="nombreCompleto" name="nombreCompleto" required>
+
+        <label for="correoElectronico">Correo Electrónico:</label>
+        <input type="email" id="correoElectronico" name="correoElectronico" required>
+
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" name="telefono" required>
+
+        <label for="direccionPostal">Dirección Postal:</label>
+        <input type="text" id="direccionPostal" name="direccionPostal" required>
+
+        <label for="direccionGaraje">Dirección de Garaje:</label>
+        <input type="text" id="direccionGaraje" name="direccionGaraje">
+
+        <h2>Conductores</h2>
+        <fieldset class="conductor">
+            <legend>Conductor 1</legend>
+            <label for="nombreConductor1">Nombre del Conductor:</label>
+            <input type="text" id="nombreConductor1" name="nombreConductor1">
+
+            <label for="fechaNacimientoConductor1">Fecha de Nacimiento del Conductor:</label>
+            <input type="date" id="fechaNacimientoConductor1" name="fechaNacimientoConductor1">
+
+            <label for="generoConductor1">Género del Conductor:</label>
+            <select id="generoConductor1" name="generoConductor1">
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </fieldset>
+
+        <div id="conductoresAdicionales"></div>
+
+        <button type="button" id="agregarConductor">Agregar Conductor Adicional</button>
+
+        <h2>Vehículos</h2>
+        <label for="anoVehiculo">Año del Vehículo:</label>
+        <input type="number" id="anoVehiculo" name="anoVehiculo">
+
+        <label for="marcaVehiculo">Marca del Vehículo:</label>
+        <input type="text" id="marcaVehiculo" name="marcaVehiculo">
+
+        <label for="modeloVehiculo">Modelo del Vehículo:</label>
+        <input type="text" id="modeloVehiculo" name="modeloVehiculo">
+
+        <label for="vinVehiculo">Número de VIN del Vehículo:</label>
+        <input type="text" id="vinVehiculo" name="vinVehiculo">
+
+        <label for="tipoCuerpoVehiculo">Tipo de Cuerpo del Vehículo:</label>
+        <input type="text" id="tipoCuerpoVehiculo" name="tipoCuerpoVehiculo">
+
+        <label for="remolqueVehiculo">¿Tiene Remolque?:</label>
+        <input type="checkbox" id="remolqueVehiculo" name="remolqueVehiculo">
+
+        <label for="arrendamientoVehiculo">Arrendamiento del Vehículo:</label>
+        <input type="text" id="arrendamientoVehiculo" name="arrendamientoVehiculo">
+
+        <h2>Facturación</h2>
+        <label for="cantidadFacturacion">Cantidad:</label>
+        <input type="number" id="cantidadFacturacion" name="cantidadFacturacion" required>
+
+        <label for="fechaFacturacion">Fecha:</label>
+        <input type="date" id="fechaFacturacion" name="fechaFacturacion" required>
 
         <button type="submit">Enviar</button>
-      </form>
-    </div>
-  </body>
+    </form>
+
+    <script src="/JS/subir_archivos.js"></script>
+</body>
 </html>
