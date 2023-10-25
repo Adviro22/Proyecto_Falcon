@@ -1,7 +1,5 @@
 const agregarConductorBtn = document.getElementById("agregarConductor");
-const conductoresAdicionales = document.getElementById(
-  "conductoresAdicionales"
-);
+const conductoresAdicionales = document.getElementById("conductoresAdicionales");
 let conductorCounter = 1;
 
 agregarConductorBtn.addEventListener("click", () => {
@@ -15,6 +13,7 @@ agregarConductorBtn.addEventListener("click", () => {
     legend.textContent = `Conductor ${conductorCounter}`;
     conductorFieldset.appendChild(legend);
 
+    // Nombre del Conductor
     const nombreLabel = document.createElement("label");
     nombreLabel.textContent = "Nombre del Conductor:";
     const nombreInput = document.createElement("input");
@@ -24,15 +23,17 @@ agregarConductorBtn.addEventListener("click", () => {
     conductorFieldset.appendChild(nombreLabel);
     conductorFieldset.appendChild(nombreInput);
 
+    // Relacion del Conductor
     const relacionLabel = document.createElement("label");
     relacionLabel.textContent = "Relacion del Conductor:";
     const relacionInput = document.createElement("input");
     relacionInput.type = "text";
-    nombreInput.id = `relacionConductor${conductorCounter}`;
-    nombreInput.name = `relacionConductor${conductorCounter}`;
+    relacionInput.id = `relacionConductor${conductorCounter}`;
+    relacionInput.name = `relacionConductor${conductorCounter}`;
     conductorFieldset.appendChild(relacionLabel);
     conductorFieldset.appendChild(relacionInput);
 
+    // Fecha de Nacimiento del Conductor
     const fechaNacimientoLabel = document.createElement("label");
     fechaNacimientoLabel.textContent = "Fecha de Nacimiento del Conductor:";
     const fechaNacimientoInput = document.createElement("input");
@@ -42,6 +43,7 @@ agregarConductorBtn.addEventListener("click", () => {
     conductorFieldset.appendChild(fechaNacimientoLabel);
     conductorFieldset.appendChild(fechaNacimientoInput);
 
+    // Género del Conductor
     const generoLabel = document.createElement("label");
     generoLabel.textContent = "Género del Conductor:";
     const generoSelect = document.createElement("select");
