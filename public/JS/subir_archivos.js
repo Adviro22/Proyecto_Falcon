@@ -24,6 +24,15 @@ agregarConductorBtn.addEventListener("click", () => {
     conductorFieldset.appendChild(nombreLabel);
     conductorFieldset.appendChild(nombreInput);
 
+    const relacionLabel = document.createElement("label");
+    relacionLabel.textContent = "Relacion del Conductor:";
+    const relacionInput = document.createElement("input");
+    relacionInput.type = "text";
+    nombreInput.id = `relacionConductor${conductorCounter}`;
+    nombreInput.name = `relacionConductor${conductorCounter}`;
+    conductorFieldset.appendChild(relacionLabel);
+    conductorFieldset.appendChild(relacionInput);
+
     const fechaNacimientoLabel = document.createElement("label");
     fechaNacimientoLabel.textContent = "Fecha de Nacimiento del Conductor:";
     const fechaNacimientoInput = document.createElement("input");

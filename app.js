@@ -42,7 +42,7 @@ app.get("/", auth, function (req, res) {
   res.sendFile(indexPath);
 });
 
-app.get("/perfil-usuario", (req, res) => {
+app.get("/perfil-usuario", auth, (req, res) => {
   if (!req.session.username) {
     res.redirect("/login");
     return;
