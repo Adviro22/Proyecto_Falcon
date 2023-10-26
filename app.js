@@ -8,9 +8,27 @@ import cookieSession from "cookie-session";
 import connection, { dbConfig } from "./db.js";
 import bodyParser from "body-parser";
 import bcryptjs from "bcryptjs";
-
+import multer from "multer";
 
 dotenv.config({ path: "./.env" });
+
+// Configura la ubicación donde se guardarán los archivos PDF
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/PDF"); // Ruta donde se guardarán los archivos
+  },
+  filename: (req, file, cb) => {
+    // Obtén la extensión del archivo original
+    const fileExtension = file.originalname.split(".").pop();
+
+    // Genera un nombre de archivo único con la fecha y hora actual y la extensión del archivo
+    const uniqueFileName = Date.now() + "-" + file.originalname;
+
+    cb(null, uniqueFileName);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const app = express();
 const PORT = process.env.PORT;
@@ -78,8 +96,9 @@ app.get("/login", function (req, res) {
   res.sendFile(indexPath);
 });
 
-app.post('/registrar', (req, res) => {
+app.post("/registrar", upload.single("archivo_pdf"), (req, res) => {
   const data = req.body;
+  const pdfFilename = req.file.filename;
 
   // Primera consulta: Insertar en Poliza
   const queryPoliza = `
@@ -89,8 +108,8 @@ app.post('/registrar', (req, res) => {
 
   connection.query(queryPoliza, (err, resultPoliza) => {
     if (err) {
-      console.error('Error al insertar en Poliza:', err);
-      res.status(500).send('Error interno del servidor');
+      console.error("Error al insertar en Poliza:", err);
+      res.status(500).send("Error interno del servidor");
     } else {
       // Obtener el ID de la póliza recién insertada
       const polizaId = resultPoliza.insertId;
@@ -103,8 +122,8 @@ app.post('/registrar', (req, res) => {
 
       connection.query(queryPropietario, (err, resultPropietario) => {
         if (err) {
-          console.error('Error al insertar en Propietario:', err);
-          res.status(500).send('Error interno del servidor');
+          console.error("Error al insertar en Propietario:", err);
+          res.status(500).send("Error interno del servidor");
         } else {
           // Tercera consulta: Insertar en Conductores (Conductor 1)
           const queryConductor1 = `
@@ -114,8 +133,8 @@ app.post('/registrar', (req, res) => {
 
           connection.query(queryConductor1, (err, resultConductor1) => {
             if (err) {
-              console.error('Error al insertar en Conductor 1:', err);
-              res.status(500).send('Error interno del servidor');
+              console.error("Error al insertar en Conductor 1:", err);
+              res.status(500).send("Error interno del servidor");
             } else {
               // Cuarta consulta: Insertar en Vehiculos
               const queryVehiculo = `
@@ -125,62 +144,91 @@ app.post('/registrar', (req, res) => {
 
               connection.query(queryVehiculo, (err, resultVehiculo) => {
                 if (err) {
-                  console.error('Error al insertar en Vehiculo:', err);
-                  res.status(500).send('Error interno del servidor');
+                  console.error("Error al insertar en Vehiculo:", err);
+                  res.status(500).send("Error interno del servidor");
                 } else {
                   // Quinta consulta: Insertar en Facturacion
                   const queryFacturacion = `
-                    INSERT INTO Facturacion (idPoliza, cantidadFacturacion, fechaFacturacion)
-                    VALUES (${polizaId}, ${req.body.cantidadFacturacion}, '${req.body.fechaFacturacion}');
+                    INSERT INTO Facturacion (idPoliza, cantidadFacturacion, fechaFacturacion, archivo_pdf)
+                    VALUES (${polizaId}, ${req.body.cantidadFacturacion}, '${req.body.fechaFacturacion}', '${pdfFilename}');
                   `;
 
-                  connection.query(queryFacturacion, (err, resultFacturacion) => {
-                    if (err) {
-                      console.error('Error al insertar en Facturacion:', err);
-                      res.status(500).send('Error interno del servidor');
-                    } else {
-                      // Verificar si se proporcionaron datos para el segundo conductor
-                      if (req.body.nombreConductor2) {
-                        // Sexta consulta: Insertar en Conductores (Conductor 2)
-                        const queryConductor2 = `
+                  connection.query(
+                    queryFacturacion,
+                    (err, resultFacturacion) => {
+                      if (err) {
+                        console.error("Error al insertar en Facturacion:", err);
+                        res.status(500).send("Error interno del servidor");
+                      } else {
+                        // Verificar si se proporcionaron datos para el segundo conductor
+                        if (req.body.nombreConductor2) {
+                          // Sexta consulta: Insertar en Conductores (Conductor 2)
+                          const queryConductor2 = `
                           INSERT INTO Conductores (idPoliza, nombreConductor, relacionConductor, fechaNacimientoConductor, generoConductor)
                           VALUES (${polizaId}, '${req.body.nombreConductor2}', '${req.body.relacionConductor2}', '${req.body.fechaNacimientoConductor2}', '${req.body.generoConductor2}');
                         `;
 
-                        connection.query(queryConductor2, (err, resultConductor2) => {
-                          if (err) {
-                            console.error('Error al insertar en Conductor 2:', err);
-                            res.status(500).send('Error interno del servidor');
-                          } else {
-                            // Verificar si se proporcionaron datos para el tercer conductor
-                            if (req.body.nombreConductor3) {
-                              // Séptima consulta: Insertar en Conductores (Conductor 3)
-                              const queryConductor3 = `
+                          connection.query(
+                            queryConductor2,
+                            (err, resultConductor2) => {
+                              if (err) {
+                                console.error(
+                                  "Error al insertar en Conductor 2:",
+                                  err
+                                );
+                                res
+                                  .status(500)
+                                  .send("Error interno del servidor");
+                              } else {
+                                // Verificar si se proporcionaron datos para el tercer conductor
+                                if (req.body.nombreConductor3) {
+                                  // Séptima consulta: Insertar en Conductores (Conductor 3)
+                                  const queryConductor3 = `
                                 INSERT INTO Conductores (idPoliza, nombreConductor, relacionConductor, fechaNacimientoConductor, generoConductor)
                                 VALUES (${polizaId}, '${req.body.nombreConductor3}', '${req.body.relacionConductor3}', '${req.body.fechaNacimientoConductor3}', '${req.body.generoConductor3}');
                               `;
 
-                              connection.query(queryConductor3, (err, resultConductor3) => {
-                                if (err) {
-                                  console.error('Error al insertar en Conductor 3:', err);
-                                  res.status(500).send('Error interno del servidor');
+                                  connection.query(
+                                    queryConductor3,
+                                    (err, resultConductor3) => {
+                                      if (err) {
+                                        console.error(
+                                          "Error al insertar en Conductor 3:",
+                                          err
+                                        );
+                                        res
+                                          .status(500)
+                                          .send("Error interno del servidor");
+                                      } else {
+                                        console.log(
+                                          "Datos registrados con éxito en la base de datos"
+                                        );
+                                        res
+                                          .status(200)
+                                          .send("Datos registrados con éxito");
+                                      }
+                                    }
+                                  );
                                 } else {
-                                  console.log('Datos registrados con éxito en la base de datos');
-                                  res.status(200).send('Datos registrados con éxito');
+                                  console.log(
+                                    "Datos registrados con éxito en la base de datos"
+                                  );
+                                  res
+                                    .status(200)
+                                    .send("Datos registrados con éxito");
                                 }
-                              });
-                            } else {
-                              console.log('Datos registrados con éxito en la base de datos');
-                              res.status(200).send('Datos registrados con éxito');
+                              }
                             }
-                          }
-                        });
-                      } else {
-                        console.log('Datos registrados con éxito en la base de datos');
-                        res.status(200).send('Datos registrados con éxito');
+                          );
+                        } else {
+                          console.log(
+                            "Datos registrados con éxito en la base de datos"
+                          );
+                          res.status(200).send("Datos registrados con éxito");
+                        }
                       }
                     }
-                  });
+                  );
                 }
               });
             }

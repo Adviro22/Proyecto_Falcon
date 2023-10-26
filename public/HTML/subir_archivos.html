@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1>Formulario de Seguro</h1>
-    <form action="/registrar" method="post">
+    <form action="/registrar" method="post" enctype="multipart/form-data">
         <h2>Información de la Póliza</h2>
 
         <label for="estadoPoliza">Estado de Póliza:</label>
@@ -91,6 +91,9 @@
 
         <label for="fechaFacturacion">Fecha:</label>
         <input type="date" id="fechaFacturacion" name="fechaFacturacion" required>
+
+        <label for="archivo_pdf">Archivo PDF:</label>
+        <input type="file" id="archivo_pdf" name="archivo_pdf" required>
 
         <button type="submit">Enviar</button>
     </form>
