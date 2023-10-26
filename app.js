@@ -78,10 +78,50 @@ app.get("/subir-archivos", auth, function (req, res) {
   res.sendFile(indexPath);
 });
 
-app.get("/mostrar-datos", function (req, res) {
-  // Utiliza el método `join` del módulo `path` para construir rutas de forma segura
-  const indexPath = path.join(__dirname, "public", "/HTML/mostrar_datos.html");
-  res.sendFile(indexPath);
+// Ruta para servir documentos PDF
+app.get('/descargar-documento/:nombreDocumento', (req, res) => {
+  const nombreDocumento = req.params.nombreDocumento;
+  const rutaDocumento = path.join(__dirname, "public", "/PDF/", nombreDocumento);
+
+  // Utiliza el módulo `express.static` para servir el archivo
+  res.download(rutaDocumento, nombreDocumento, (err) => {
+    if (err) {
+      // Maneja errores, por ejemplo, enviando una respuesta de error al cliente.
+      res.status(500).send("Error al descargar el documento");
+    }
+  });
+});
+
+app.get("/mostrar-datos/:numeroPoliza", function (req, res) {
+  // Obtén el número de póliza de los parámetros de la URL
+  const numeroPoliza = req.params.numeroPoliza;
+
+  // Realiza una consulta para obtener los datos de póliza y facturación en función del número de póliza
+  const query = `
+    SELECT *
+    FROM Poliza AS P
+    INNER JOIN Propietario AS Prop ON P.idPoliza = Prop.idPoliza
+    INNER JOIN Conductores AS Cond ON P.idPoliza = Cond.idPoliza
+    INNER JOIN Vehiculos AS Veh ON P.idPoliza = Veh.idPoliza
+    INNER JOIN Facturacion AS Fact ON P.idPoliza = Fact.idPoliza
+    WHERE P.numeroPoliza = ?
+  `;
+
+  connection.query(query, [numeroPoliza], (err, result) => {
+    if (err) {
+      // Manejar errores, por ejemplo, enviando una respuesta de error al cliente.
+      res.status(500).send("Error interno del servidor");
+    } else if (result.length > 0) {
+      // Verifica que los datos se obtengan correctamente
+      console.log("Datos de la póliza y facturación:", result);
+
+      // Renderiza tu página HTML con los datos de la póliza y facturación recuperados.
+      res.render("mostrar_datos", { polizaData: result });
+    } else {
+      // Manejar el caso en el que no se encontró una póliza con el número proporcionado.
+      res.status(404).send("Póliza no encontrada");
+    }
+  });
 });
 
 app.get("/register", function (req, res) {
