@@ -38,9 +38,6 @@
       <% var endDate = new Date(polizaData[0].fechaFinalizacion); %>
 
       <p>Term: <b><%= startDate.toLocaleDateString('en-US') %> - <%= endDate.toLocaleDateString('en-US') %></b></p>
-
-      
-      </p>
     </div>
 
     <div class="container">
@@ -79,23 +76,28 @@
         </h2>
       </div>
     </div>
-    <section class="Accordions">
-      <div class="accordion">
-        <details>
-          <summary>
-            Drivers <br />
-            1. <%= polizaData[0].nombreConductor %> (Insured)
-          </summary>
-          <p>
-            Relationship: <b><%= polizaData[0].relacionConductor %></b> <br />
-            Date of Birth: <b><%= new Date(polizaData[0].fechaNacimientoConductor).toLocaleDateString('en-US') %></b>
-            <br />
-            Gender: <b><%= polizaData[0].generoConductor %></b>
-          </p>
-        </details>
-      </div>
-    </section>
-    <br /><br />
+    
+    <!-- Sección para conductores -->
+    <% for (let i = 0; i < conductores.length; i++) { %>
+      <section class="Accordions">
+        <div class="accordion">
+          <details>
+            <summary>
+              Drivers <br />
+              <%= i + 1 %>. <%= conductores[i].nombreConductor %> (Insured)
+            </summary>
+            <p>
+              Relationship: <b><%= conductores[i].relacionConductor %></b> <br />
+              Date of Birth: <b><%= new Date(conductores[i].fechaNacimientoConductor).toLocaleDateString('en-US') %></b>
+              <br />
+              Gender: <b><%= conductores[i].generoConductor %></b>
+            </p>
+          </details>
+        </div>
+      </section>
+      <br>
+    <% } %>
+      <br>
     <section class="Accordions">
       <div class="accordion">
         <details>
@@ -117,6 +119,7 @@
     </section>
     <br />
     <br />
+    <!-- Sección para facturación -->
     <div id="Facturacion">
       <h1 id="facturacion_texto">Billing</h1>
     </div>
@@ -124,21 +127,18 @@
     <section class="Accordions">
       <div class="accordion">
         <details>
-          <summary>Payment Receipts</summary>
+          <summary>Payment Receipt</summary>
           <table>
             <tr>
               <td>X</td>
               <td><b>Amount</b></td>
               <td><b>Date</b></td>
             </tr>
-            <% polizaData.forEach(function(factura) { %>
-              <tr>
-                <td><a href="/descargar-documento/<%= polizaData[0].archivo_pdf %>" download><img src="../IMG/pdf.png" style="width: 20px;"></a></td>
-                <td><%= factura.cantidadFacturacion %></td>
-                <td><%= new Date(factura.fechaFacturacion).toLocaleDateString('en-US') %></td>
-              </tr>
-            <% }); %>
-            
+            <tr>
+              <td><a href="/descargar-documento/<%= facturaciones[0].archivo_pdf %>" download><img src="../IMG/pdf.png" style="width: 20px;"></a></td>
+              <td><%= facturaciones[0].cantidadFacturacion %></td>
+              <td><%= new Date(facturaciones[0].fechaFacturacion).toLocaleDateString('en-US') %></td>
+            </tr>
           </table>
         </details>
       </div>

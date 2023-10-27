@@ -103,7 +103,7 @@ app.get("/mostrar-datos/:numeroPoliza", function (req, res) {
     INNER JOIN Propietario AS Prop ON P.idPoliza = Prop.idPoliza
     INNER JOIN Conductores AS Cond ON P.idPoliza = Cond.idPoliza
     INNER JOIN Vehiculos AS Veh ON P.idPoliza = Veh.idPoliza
-    INNER JOIN Facturacion AS Fact ON P.idPoliza = Fact.idPoliza
+    LEFT JOIN Facturacion AS Fact ON P.idPoliza = Fact.idPoliza
     WHERE P.numeroPoliza = ?
   `;
 
@@ -115,8 +115,24 @@ app.get("/mostrar-datos/:numeroPoliza", function (req, res) {
       // Verifica que los datos se obtengan correctamente
       console.log("Datos de la póliza y facturación:", result);
 
-      // Renderiza tu página HTML con los datos de la póliza y facturación recuperados.
-      res.render("mostrar_datos", { polizaData: result });
+      // Asegúrate de que los datos de facturación se almacenen en un arreglo
+      const facturaciones = result.map((row) => ({
+        cantidadFacturacion: row.cantidadFacturacion,
+        fechaFacturacion: row.fechaFacturacion,
+        archivo_pdf: row.archivo_pdf
+      }));
+
+      // Ahora, necesitas agrupar los datos de conductores en un formato más adecuado
+      const conductores = result.map((row) => ({
+        idConductor: row.idConductor,
+        nombreConductor: row.nombreConductor,
+        relacionConductor: row.relacionConductor,
+        fechaNacimientoConductor: row.fechaNacimientoConductor,
+        generoConductor: row.generoConductor,
+      }));
+
+      // Renderiza tu página HTML con los datos de la póliza y los conductores recuperados.
+      res.render("mostrar_datos", { polizaData: result, conductores, facturaciones });
     } else {
       // Manejar el caso en el que no se encontró una póliza con el número proporcionado.
       res.status(404).send("Póliza no encontrada");
