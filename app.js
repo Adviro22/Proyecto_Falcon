@@ -92,22 +92,44 @@ app.get('/descargar-documento/:nombreDocumento', (req, res) => {
   });
 });
 
-app.get("/mostrar-datos/:numeroPoliza", function (req, res) {
-  // Obtén el número de póliza de los parámetros de la URL
-  const numeroPoliza = req.params.numeroPoliza;
+app.get("/mostrar-datos/:numeroPolizaOVin", function (req, res) {
+  // Obtén el número de póliza o número de VIN de los parámetros de la URL
+  const numeroPolizaOVin = req.params.numeroPolizaOVin;
 
-  // Realiza una consulta para obtener los datos de póliza y facturación en función del número de póliza
-  const query = `
-    SELECT *
-    FROM Poliza AS P
-    INNER JOIN Propietario AS Prop ON P.idPoliza = Prop.idPoliza
-    INNER JOIN Conductores AS Cond ON P.idPoliza = Cond.idPoliza
-    INNER JOIN Vehiculos AS Veh ON P.idPoliza = Veh.idPoliza
-    LEFT JOIN Facturacion AS Fact ON P.idPoliza = Fact.idPoliza
-    WHERE P.numeroPoliza = ?
-  `;
+  // Verifica si el número proporcionado parece ser un número de póliza (solo números)
+  const isNumeroPoliza = /^\d+$/.test(numeroPolizaOVin);
 
-  connection.query(query, [numeroPoliza], (err, result) => {
+  // Realiza una consulta para obtener los datos de póliza y facturación en función del número de póliza o VIN
+  let query;
+  let queryParams;
+
+  if (isNumeroPoliza) {
+    // Si el número parece ser de póliza (solo números), busca por número de póliza
+    query = `
+      SELECT *
+      FROM Poliza AS P
+      INNER JOIN Propietario AS Prop ON P.idPoliza = Prop.idPoliza
+      INNER JOIN Conductores AS Cond ON P.idPoliza = Cond.idPoliza
+      INNER JOIN Vehiculos AS Veh ON P.idPoliza = Veh.idPoliza
+      LEFT JOIN Facturacion AS Fact ON P.idPoliza = Fact.idPoliza
+      WHERE P.numeroPoliza = ?
+    `;
+    queryParams = [numeroPolizaOVin];
+  } else {
+    // Si el número parece ser un VIN (combinación de letras y números), busca por VIN
+    query = `
+      SELECT *
+      FROM Poliza AS P
+      INNER JOIN Propietario AS Prop ON P.idPoliza = Prop.idPoliza
+      INNER JOIN Conductores AS Cond ON P.idPoliza = Cond.idPoliza
+      INNER JOIN Vehiculos AS Veh ON P.idPoliza = Veh.idPoliza
+      LEFT JOIN Facturacion AS Fact ON P.idPoliza = Fact.idPoliza
+      WHERE Veh.vinVehiculo = ?
+    `;
+    queryParams = [numeroPolizaOVin];
+  }
+
+  connection.query(query, queryParams, (err, result) => {
     if (err) {
       // Manejar errores, por ejemplo, enviando una respuesta de error al cliente.
       res.status(500).send("Error interno del servidor");
